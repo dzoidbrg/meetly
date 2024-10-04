@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/models.dart' as models;
+import 'package:meetlyv2/login.dart';
 
 void main() {
-  runApp(const MyApp());
+    WidgetsFlutterBinding.ensureInitialized();
+
+Client client = Client();
+client
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject('TOKEN')
+    .setSelfSigned(status: true); 
+  
+Account account = Account(client);
+// For self signed certificates, only use for development
+  runApp(MyApp(account: account));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatelessWidget {  
+  final Account account;
+
+  const MyApp({super.key, required this.account});
 
   // This widget is the root of your application.
   @override
@@ -31,13 +46,23 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: Scaffold(
+        body:MyHomePage(title: "Meetly", account: account,)
+      ),
     );
   }
 }
 
+
+
+
+
+
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+
+   final Account account;
+
+  const MyHomePage({super.key, required this.title, required this.account});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -55,8 +80,32 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool isSignedIn = false;
+  models.User? user;
   int _counter = 0;
 
+
+@override
+  void initState() {
+    // TODO: implement initState
+    
+    
+  }
+  void _initStateAsync() async {
+    try  {
+      var user = await widget.account.get();
+      setState(() {
+        user = user;
+        isSignedIn = true;
+      });
+
+    } catch (e) {
+      setState(() {
+        isSignedIn = false;
+      }); 
+      
+    }
+  }
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -70,6 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+   
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -105,13 +155,15 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
+            
+            (isSignedIn ? Text(
               'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+              
+            ) : Text('You need to sign in buddy')),
+            (isSignedIn ? Container() : ElevatedButton(onPressed: () => {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Material(child: LoginPage(account: widget.account))))
+            }, child: const Text("Sign in")))
+           
           ],
         ),
       ),
