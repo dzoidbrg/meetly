@@ -9,7 +9,7 @@ void main() {
 Client client = Client();
 client
     .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('TOKEN')
+    .setProject('66ff9e55000f6375882c')
     .setSelfSigned(status: true); 
   
 Account account = Account(client);
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
         useMaterial3: true,
       ),
       home: Scaffold(
@@ -80,32 +80,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool isSignedIn = false;
+  late Future<bool> login;
   models.User? user;
   int _counter = 0;
 
+  Future<bool> isSignedIn() async {
+    try {
+      // Attempt to retrieve the currently logged-in user
+      models.User user = await widget.account.get();
+      return true; // User is signed in
+    } catch (e) {
+      return false; // User is not signed in
+    }
+  }
 
 @override
   void initState() {
     // TODO: implement initState
-    
+    login = isSignedIn();
     
   }
-  void _initStateAsync() async {
-    try  {
-      var user = await widget.account.get();
-      setState(() {
-        user = user;
-        isSignedIn = true;
-      });
 
-    } catch (e) {
-      setState(() {
-        isSignedIn = false;
-      }); 
-      
-    }
-  }
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -126,7 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
+    return 
+    DefaultTabController(length: 3, child: 
+   Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
@@ -135,43 +132,49 @@ class _MyHomePageState extends State<MyHomePage> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+         bottom: const TabBar(
+          tabs: [
+            Tab(icon: Icon(Icons.explore)),
+            Tab(icon: Icon(Icons.bookmark)),
+            Tab(icon: Icon(Icons.account_box)),
+          ],
+        ),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            
-            (isSignedIn ? Text(
-              'You have pushed the button this many times:',
-              
-            ) : Text('You need to sign in buddy')),
-            (isSignedIn ? Container() : ElevatedButton(onPressed: () => {
+        child:  FutureBuilder(
+      future: login,
+      builder: (context,snapshot) {
+        if (snapshot.data != null) {
+          if (snapshot.data!) {
+            // logged in 
+            return TabBarView(children: [
+              // Explore
+              Text("Explore"),
+              Text("My Events"),
+              Text("Account")
+              // My Events
+              // Account 
+            ]);
+          } else {
+            return ElevatedButton(child: Text("Sign in"),onPressed: () => {
               Navigator.push(context, MaterialPageRoute(builder: (context) => Material(child: LoginPage(account: widget.account))))
-            }, child: const Text("Sign in")))
-           
-          ],
-        ),
+            });
+          }
+          
+        } else {
+          return CircularProgressIndicator();
+        }
+        }),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+    ));
+    
+   
   }
 }
