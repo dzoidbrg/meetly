@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
+import 'package:meetlyv2/account.dart';
 import 'package:meetlyv2/login.dart';
 
 void main() {
@@ -8,10 +9,9 @@ void main() {
 
 Client client = Client();
 client
-    .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('66ff9e55000f6375882c')
-    .setSelfSigned(status: true); 
-  
+    .setEndpoint('https://appwrite.bialy.ch/v1')
+    .setProject('6756be660027fc17afa9')
+    .setSelfSigned(status: true);
 Account account = Account(client);
 // For self signed certificates, only use for development
   runApp(MyApp(account: account));
@@ -80,24 +80,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late Future<bool> login;
   models.User? user;
   int _counter = 0;
 
-  Future<bool> isSignedIn() async {
-    try {
-      // Attempt to retrieve the currently logged-in user
-      models.User user = await widget.account.get();
-      return true; // User is signed in
-    } catch (e) {
-      return false; // User is not signed in
-    }
-  }
+
 
 @override
   void initState() {
     // TODO: implement initState
-    login = isSignedIn();
     
   }
 
@@ -144,28 +134,35 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child:  FutureBuilder(
-      future: login,
+      future: widget.account.get(),
       builder: (context,snapshot) {
-        if (snapshot.data != null) {
-          if (snapshot.data!) {
+        
+        if (snapshot.hasError) {
+          if ((snapshot.error as AppwriteException).code == 401) {
+          return ElevatedButton(child: const Text("Sign in"),onPressed: () => {
+               Navigator.push(context, MaterialPageRoute(builder: (context) => Material(child: LoginPage(account: widget.account))))
+             });
+           }
+          }
+          // else {
+          //   
+        
+        if (snapshot.hasData) {
+          if (!snapshot.hasError) {
             // logged in 
-            return TabBarView(children: [
+            return  TabBarView(children: [
               // Explore
               Text("Explore"),
               Text("My Events"),
-              Text("Account")
+              AccountPage(user: snapshot.data!, account: widget.account,)
               // My Events
               // Account 
             ]);
-          } else {
-            return ElevatedButton(child: Text("Sign in"),onPressed: () => {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Material(child: LoginPage(account: widget.account))))
-            });
-          }
+          } 
           
-        } else {
-          return CircularProgressIndicator();
         }
+         return const CircularProgressIndicator();
+        
         }),
       ),
       floatingActionButton: FloatingActionButton(

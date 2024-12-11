@@ -1,7 +1,5 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 class ExplorePage extends StatefulWidget {
   const ExplorePage({super.key});
@@ -21,6 +19,6 @@ class _ExplorePageState extends State<ExplorePage> {
   }
   @override
   Widget build(BuildContext context) {
-    return List();
+    return Text("Hello world my triggas");
   }
 }
