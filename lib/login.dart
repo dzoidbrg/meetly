@@ -15,6 +15,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
+  bool loginOrRegister = false;
   Future<void> _showMyDialog(message) async {
     // TODO: handle errors properly with nice error messages
     return showDialog<void>(
@@ -86,9 +87,13 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Row(children: [Text(loginOrRegister ? "Login      " : "Register "),Switch(value: loginOrRegister, onChanged: (x) {setState(() {
+              loginOrRegister = x;
+            });})])),
             Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), child: TextField(decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Name", hintText: "Name"))),
             Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), child: TextField(decoration: InputDecoration(border: OutlineInputBorder(), labelText: "E-Mail", hintText: "abcd@gmail.com"))),
             Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), child: TextField(decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Password", hintText: "hopefully not 1234"))),
+            ElevatedButton(onPressed: () {}, child: Text(loginOrRegister ? "Sign in " : "Sign out"))
 
           ],
         )));
