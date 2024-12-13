@@ -3,6 +3,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
 import 'package:meetlyv2/account.dart';
 import 'package:meetlyv2/login.dart';
+import 'package:provider/provider.dart';
 
 void main() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -10,17 +11,15 @@ void main() {
 Client client = Client();
 client
     .setEndpoint('https://appwrite.bialy.ch/v1')
-    .setProject('6756be660027fc17afa9')
-    .setSelfSigned(status: true);
+    .setProject('6756be660027fc17afa9')    .setSelfSigned(status: true);
 Account account = Account(client);
 // For self signed certificates, only use for development
-  runApp(MyApp(account: account));
+  runApp(ChangeNotifierProvider(create: (context) => AppwriteData(account), child:MyApp()));
 }
 
 class MyApp extends StatelessWidget {  
-  final Account account;
 
-  const MyApp({super.key, required this.account});
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -47,7 +46,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: Scaffold(
-        body:MyHomePage(title: "Meetly", account: account,)
+        body:MyHomePage(title: "Meetly")
       ),
     );
   }
@@ -60,9 +59,8 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
 
-   final Account account;
 
-  const MyHomePage({super.key, required this.title, required this.account});
+  const MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -88,8 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
 @override
   void initState() {
     // TODO: implement initState
-    
+
   }
+
 
   void _incrementCounter() {
     setState(() {
@@ -133,37 +132,30 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child:  FutureBuilder(
-      future: widget.account.get(),
-      builder: (context,snapshot) {
-        
-        if (snapshot.hasError) {
-          if ((snapshot.error as AppwriteException).code == 401) {
-          return ElevatedButton(child: const Text("Sign in"),onPressed: () => {
-               Navigator.push(context, MaterialPageRoute(builder: (context) => Material(child: LoginPage(account: widget.account))))
-             });
-           }
+        child:  Consumer<AppwriteData>(builder: (ctx, model, ju) {
+           if (model.isLoading) {
+              return CircularProgressIndicator();
+          } else if (model.shouldLogin) {
+              return ElevatedButton(child: const Text("Sign in"),onPressed: () => {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Material(child: LoginPage())))
+
+              });
+            } else {
+
+
+              return  TabBarView(children: [
+                // Explore
+                Text("Explore"),
+                Text("My Events"),
+                AccountPage()
+                // My Events
+                // Account
+              ]);
+            }
+
+
           }
-          // else {
-          //   
-        
-        if (snapshot.hasData) {
-          if (!snapshot.hasError) {
-            // logged in 
-            return  TabBarView(children: [
-              // Explore
-              Text("Explore"),
-              Text("My Events"),
-              AccountPage(user: snapshot.data!, account: widget.account,)
-              // My Events
-              // Account 
-            ]);
-          } 
-          
-        }
-         return const CircularProgressIndicator();
-        
-        }),
+        )
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
