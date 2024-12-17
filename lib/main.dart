@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
+import 'package:meetlyv2/AddPage.dart';
 import 'package:meetlyv2/account.dart';
+import 'package:meetlyv2/discover.dart';
 import 'package:meetlyv2/login.dart';
+import 'package:meetlyv2/model.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -13,8 +16,9 @@ client
     .setEndpoint('https://appwrite.bialy.ch/v1')
     .setProject('6756be660027fc17afa9')    .setSelfSigned(status: true);
 Account account = Account(client);
+var databases = Databases(client);
 // For self signed certificates, only use for development
-  runApp(ChangeNotifierProvider(create: (context) => AppwriteData(account), child:MyApp()));
+  runApp(ChangeNotifierProvider(create: (context) => AppwriteData(account,databases), child:MyApp()));
 }
 
 class MyApp extends StatelessWidget {  
@@ -42,7 +46,7 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
       home: Scaffold(
@@ -89,16 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   }
 
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  void triggerAddEvent() {
+    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => Material(child: AddEventPage())));
   }
 
   @override
@@ -145,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
               return  TabBarView(children: [
                 // Explore
-                Text("Explore"),
+                DiscoverPage(),
                 Text("My Events"),
                 AccountPage()
                 // My Events
@@ -158,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
         )
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: triggerAddEvent,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

@@ -1,87 +1,9 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/models.dart';
+import 'package:meetlyv2/model.dart';
 import 'package:provider/provider.dart';
-class AppwriteData extends ChangeNotifier {
- late Account account;
-  User? user;
-  bool isLoading = true;
-  bool shouldLogin = false;
-  AppwriteData(Account acc) {
-    // run init shit
-    account = acc;
-    attemptSessionRestore();
 
-  }
- void signOut() async {
-   await account.deleteSession(sessionId: "current");
-   user = null;
-   shouldLogin = true;
-   notifyListeners();
-
- }
-  /// Null is good as it means no errors
- Future<String?> login(String email, String password) async {
-   try {
-     await account.createEmailPasswordSession(email: email, password: password);
-   } on AppwriteException catch (e) {
-
-     return e.toString();
-   }
-   try {
-     user = await account.get();
-     shouldLogin = false;
-     isLoading = false;
-   } catch (e) {
-     return e.toString();
-   } finally {
-     print(user);
-     print ("ooof oink my nig");
-
-     notifyListeners();
-
-   }
- }
- Future<String?> register(String email, String password, String name) async {
-   try {
-     await account.create(
-         userId: ID.unique(), email: email, password: password, name: name);
-   } on AppwriteException catch (e) {
-
-     return e.toString();
-   }
-
-   return await login(email, password);
- }
-
- Future<void> attemptSessionRestore() async {
-    try {
-     user = await account.get();
-     isLoading = false;
-    } catch (e) {
-      // Maybe try displaying error?
-      print(e);
-      isLoading = false;
-      shouldLogin = true;
-    } finally {
-      print("Horray!");
-
-      notifyListeners();
-    }
-  }
-  void setAccount (Account acc) {
-    account = acc;
-    notifyListeners();
-  }
-  void setUser (User? usr) {
-    user = usr;
-    print(this.user);
-    notifyListeners();
-  }
-  void forceNotify() {
-    notifyListeners();
-  }
-}
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -135,46 +57,114 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
         appBar: AppBar(title: Text('Log In')),
         body: Consumer<AppwriteData>(builder: (ctx, model, child) {
-          return Center(
+          if (!loginOrRegister) {
+            return Center(
 
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Row(children: [Text(loginOrRegister ? "Login      " : "Register "),Switch(value: loginOrRegister, onChanged: (x) {setState(() {
-                    loginOrRegister = x;
-                  });})])),
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), child: TextField(onChanged: (s) {
-                    name = s;
-                  }, decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Name", hintText: "Name"))),
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), child: TextField(onChanged: (s) {setState(() {
-                    email = s;
-                  });}, decoration: InputDecoration(border: OutlineInputBorder(), labelText: "E-Mail", hintText: "abcd@gmail.com"))),
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), child: TextField(obscureText: true, onChanged: (s) {
-                    password = s;
-                  },decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Password", hintText: "hopefully not 1234"))),
-                  ElevatedButton(onPressed: () async {
-                    if (loginOrRegister) {
-
-                     String? res = await model.login(email, password);
-                     if (res == null) {
-                       print("Success");
-                       Navigator.pop(ctx);
-                     } else {
-                       _showMyDialog(res);
-                     }
-                    } else {
-                      String? res = await model.register(email, password, name);
-                      if (res == null) {
-                        print("Success");
-                        Navigator.pop(ctx);
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(children: [
+                          Text(loginOrRegister ? "Login      " : "Register "),
+                          Switch(value: loginOrRegister, onChanged: (x) {
+                            setState(() {
+                              loginOrRegister = x;
+                            });
+                          })
+                        ])),
+                    Padding(padding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 5),
+                        child: TextField(onChanged: (s) {
+                          name = s;
+                        },
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Name",
+                                hintText: "Name"))),
+                    Padding(padding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 5),
+                        child: TextField(onChanged: (s) {
+                          setState(() {
+                            email = s;
+                          });
+                        },
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "E-Mail",
+                                hintText: "abcd@gmail.com"))),
+                    Padding(padding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 5),
+                        child: TextField(obscureText: true,
+                            onChanged: (s) {
+                              password = s;
+                            },
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Password",
+                                hintText: "hopefully not 1234"))),
+                    ElevatedButton(onPressed: () async {
+                      if (loginOrRegister) {
+                        String? res = await model.login(email, password);
+                        if (res == null) {
+                          print("Success");
+                          Navigator.pop(ctx);
+                        } else {
+                          _showMyDialog(res);
+                        }
                       } else {
-                        _showMyDialog(res);
+                        String? res = await model.register(email, password,
+                            name);
+                        if (res == null) {
+                          print("Success");
+                          Navigator.pop(ctx);
+                        } else {
+                          _showMyDialog(res);
+                        }
                       }
-                    }
-                  }, child: Text(!loginOrRegister ? "Sign up " : "Sign in"))
+                    }, child: Text(!loginOrRegister ? "Sign up " : "Sign in"))
 
-                ],
-              ));
+                  ],
+                ));
+          } else {
+            return Center(
+
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Row(children: [Text(loginOrRegister ? "Login      " : "Register "),Switch(value: loginOrRegister, onChanged: (x) {setState(() {
+                      loginOrRegister = x;
+                    });})])),
+
+                    Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), child: TextField(onChanged: (s) {setState(() {
+                      email = s;
+                    });}, decoration: InputDecoration(border: OutlineInputBorder(), labelText: "E-Mail", hintText: "abcd@gmail.com"))),
+                    Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5), child: TextField(obscureText: true, onChanged: (s) {
+                      password = s;
+                    },decoration: InputDecoration(border: OutlineInputBorder(), labelText: "Password", hintText: "hopefully not 1234"))),
+                    ElevatedButton(onPressed: () async {
+                      if (loginOrRegister) {
+
+                        String? res = await model.login(email, password);
+                        if (res == null) {
+                          print("Success");
+                          Navigator.pop(ctx);
+                        } else {
+                          _showMyDialog(res);
+                        }
+                      } else {
+                        String? res = await model.register(email, password, name);
+                        if (res == null) {
+                          print("Success");
+                          Navigator.pop(ctx);
+                        } else {
+                          _showMyDialog(res);
+                        }
+                      }
+                    }, child: Text(!loginOrRegister ? "Sign up " : "Sign in"))
+
+                  ],
+                ));
+          }
         }));
   }
 }

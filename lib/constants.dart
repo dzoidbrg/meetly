@@ -1,0 +1,2 @@
+final DATABASE_ID = 'testing';
+final EVENTS_COLLECTION_ID = '675cb6290028d874ee54';

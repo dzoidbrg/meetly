@@ -2,6 +2,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
 import 'package:meetlyv2/login.dart';
+import 'package:meetlyv2/model.dart';
 import 'package:provider/provider.dart';
 
 class AccountPage extends StatefulWidget {
