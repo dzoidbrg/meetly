@@ -1,8 +1,14 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/models.dart';
+import 'package:intl/intl.dart';
 import 'package:meetlyv2/constants.dart';
-
+import 'package:uuid/uuid.dart';
+class EventCollectionDocument {
+  String title;
+  String creatorUserId;
+  EventCollectionDocument(this.title, this.creatorUserId);
+}
 class AppwriteData extends ChangeNotifier {
    Account account;
   Databases databases;
@@ -22,6 +28,14 @@ class AppwriteData extends ChangeNotifier {
     shouldLogin = true;
     notifyListeners();
 
+  }
+  void addEvent(String title, DateTime whenDate) async {
+
+    await databases.createDocument(databaseId: DATABASE_ID, collectionId: EVENTS_COLLECTION_ID, documentId: Uuid().v4(), data: {
+      "title": title,
+      "creatorUserId": user!.$id,
+      "when": new DateFormat("yyyy-MM-dd hh:mm:ss").format(whenDate)
+    });
   }
   Future<DocumentList> discover() async {
     return await databases.listDocuments(databaseId: DATABASE_ID, collectionId: EVENTS_COLLECTION_ID);
