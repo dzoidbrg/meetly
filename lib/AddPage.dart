@@ -38,7 +38,6 @@ class _AddEventPageState extends State<AddEventPage> {
               Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                   child: Row(
-                    spacing: 2,
                     children: [
                       Text("When: ",
                           style: Theme.of(context).textTheme.titleMedium),

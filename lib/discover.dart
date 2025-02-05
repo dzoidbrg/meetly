@@ -25,7 +25,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
         if (snapshot.hasData) {
          return RefreshIndicator(child: ListView.builder(itemBuilder: (ctx,index) {
            var widgetTitle = snapshot.data!.documents[index].data["title"];
-           var widgetDateTime = snapshot.data!.documents[index].data["datetime"];
+           var widgetDateTime = snapshot.data!.documents[index].data["when"];
 
            log('Date time ${widgetDateTime.toString()}');
            if (widgetDateTime == null ) {
