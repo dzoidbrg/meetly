@@ -72,7 +72,7 @@ class AppwriteData extends ChangeNotifier {
         doc.data["creatorUserId"],
         doc.$id,
         doc.data["when"],
-        doc.data["participants"],
+        (doc.data["participants"] as List).map((item) => item.toString()).toList(),
         doc.data["location"]);
     return event;
   }
