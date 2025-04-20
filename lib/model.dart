@@ -25,10 +25,11 @@ class EventCollectionDocument {
 class AppwriteData extends ChangeNotifier {
   Account account;
   Databases databases;
+  Teams teams;
   User? user;
   bool isLoading = true;
   bool shouldLogin = false;
-  AppwriteData(this.account, this.databases) {
+  AppwriteData(this.account, this.databases, this.teams) {
     //
     attemptSessionRestore();
   }
@@ -72,7 +73,9 @@ class AppwriteData extends ChangeNotifier {
         doc.data["creatorUserId"],
         doc.$id,
         doc.data["when"],
-        (doc.data["participants"] as List).map((item) => item.toString()).toList(),
+        (doc.data["participants"] as List)
+            .map((item) => item.toString())
+            .toList(),
         doc.data["location"]);
     return event;
   }

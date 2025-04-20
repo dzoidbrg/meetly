@@ -13,14 +13,16 @@ void main() {
 
   Client client = Client();
   client
-      .setEndpoint('https://appwrite.bialy.ch/v1')
-      .setProject('6756be660027fc17afa9')
+      .setEndpoint('https://fra.cloud.appwrite.io/v1')
+      .setProject('680540a600066dd5334c')
       .setSelfSigned(status: true);
   Account account = Account(client);
+  Teams teams = Teams(client);
   var databases = Databases(client);
 // For self signed certificates, only use for development
   runApp(ChangeNotifierProvider(
-      create: (context) => AppwriteData(account, databases), child: MyApp()));
+      create: (context) => AppwriteData(account, databases, teams),
+      child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
