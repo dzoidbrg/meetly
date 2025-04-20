@@ -14,7 +14,7 @@ export default async ({ req, res, log, error }: any) => {
     const response = await users.list();
     // Log messages and errors to the Appwrite Console
     // These logs won't be seen by your end users
-    log(`Total users: ${response.total}`);
+    log(`Total users: ${response}`);
     return res.json(response);
   } catch(err) {
     error("Could not list users: " + error.message);
