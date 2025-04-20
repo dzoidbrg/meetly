@@ -15,8 +15,9 @@ export default async ({ req, res, log, error }: any) => {
     // Log messages and errors to the Appwrite Console
     // These logs won't be seen by your end users
     log(`Total users: ${response.total}`);
+    return res.json(response);
   } catch(err) {
-    error("Could not list users: " + err.message);
+    error("Could not list users: " + error.message);
   }
 
   // The req object contains the request data
@@ -24,6 +25,7 @@ export default async ({ req, res, log, error }: any) => {
     // Use res object to respond with text(), json(), or binary()
     // Don't forget to return a response!
     return res.text("Pong");
+    
   }
 
   return res.json({
