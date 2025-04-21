@@ -30,6 +30,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppwriteData>(builder: (context, model, _) {
+      model.getAllusers();
       return FutureBuilder(
         future: model.getEvent(widget.eventId),
         builder: (context, snapshot) {

@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
   Client client = Client();
   client
       .setEndpoint('https://fra.cloud.appwrite.io/v1')
@@ -18,10 +17,11 @@ void main() {
       .setSelfSigned(status: true);
   Account account = Account(client);
   Teams teams = Teams(client);
+  Functions functions = Functions(client);
   var databases = Databases(client);
 // For self signed certificates, only use for development
   runApp(ChangeNotifierProvider(
-      create: (context) => AppwriteData(account, databases, teams),
+      create: (context) => AppwriteData(account, databases, teams, functions),
       child: MyApp()));
 }
 

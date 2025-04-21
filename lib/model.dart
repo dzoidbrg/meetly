@@ -26,10 +26,11 @@ class AppwriteData extends ChangeNotifier {
   Account account;
   Databases databases;
   Teams teams;
+  Functions functions;
   User? user;
   bool isLoading = true;
   bool shouldLogin = false;
-  AppwriteData(this.account, this.databases, this.teams) {
+  AppwriteData(this.account, this.databases, this.teams, this.functions) {
     //
     attemptSessionRestore();
   }
@@ -45,6 +46,9 @@ class AppwriteData extends ChangeNotifier {
 // 1. Much simpler
 // 2. We want MVP
   Future<List<DatePickerUser>> getAllusers() async {
+    var response =
+        await functions.createExecution(functionId: "680547ee00322e0ecc7a");
+    print(response.responseBody);
     return [];
   }
 

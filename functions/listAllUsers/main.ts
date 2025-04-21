@@ -12,12 +12,17 @@ export default async ({ req, res, log, error }: any) => {
 
   try {
     const response = await users.list();
+
     // Log messages and errors to the Appwrite Console
     // These logs won't be seen by your end users
-    log(`Total users: ${response}`);
-    return res.json(response);
+    log(`Total users: ${response.total}`);
+    
+    // Extract only the names from the users array
+    const userNames = response.users.map(user => user.name);
+    
+    return res.json({ names: userNames });
   } catch(err) {
-    error("Could not list users: " + error.message);
+    error("Could not list users: " + err.message);
   }
 
   // The req object contains the request data
