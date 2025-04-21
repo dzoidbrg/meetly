@@ -32,7 +32,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     return Consumer<AppwriteData>(builder: (context, model, _) {
       model.getAllusers();
       return FutureBuilder(
-        future: model.getEvent(widget.eventId),
+        future:
+            Future.wait([model.getEvent(widget.eventId), model.getAllusers()]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
@@ -98,7 +99,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                   SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      snapshot.data!.title,
+                                      (snapshot.data![0]
+                                              as EventCollectionDocument)
+                                          .title,
                                       style: TextStyle(
                                         fontSize: 24,
                                         fontWeight: FontWeight.bold,
@@ -127,8 +130,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                     ),
                                     SizedBox(width: 8),
                                     Text(
-                                      DateFormat.yMMMMd().format(
-                                          DateTime.parse(snapshot.data!.when)),
+                                      DateFormat.yMMMMd().format(DateTime.parse(
+                                          (snapshot.data![0]
+                                                  as EventCollectionDocument)
+                                              .when!)),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                         color: Theme.of(context).primaryColor,
@@ -174,7 +179,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                               Padding(
                                 padding: const EdgeInsets.only(left: 28.0),
                                 child: Text(
-                                  snapshot.data!.location,
+                                  (snapshot.data![0] as EventCollectionDocument)
+                                      .location,
                                   style: TextStyle(
                                     fontSize: 16,
                                   ),
@@ -248,7 +254,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                       color: Theme.of(context).primaryColor),
                                   SizedBox(width: 8),
                                   Text(
-                                    "Participants (${_mockParticipants.length})",
+                                    "Participants (${(snapshot.data![0] as EventCollectionDocument).participants.length})",
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -260,34 +266,39 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
-                                children: _mockParticipants
-                                    .map(
-                                      (participant) => Chip(
-                                        backgroundColor: Theme.of(context)
-                                            .primaryColor
-                                            .withOpacity(0.1),
-                                        side: BorderSide(
-                                          color: Theme.of(context)
-                                              .primaryColor
-                                              .withOpacity(0.2),
-                                        ),
-                                        avatar: CircleAvatar(
-                                          backgroundColor:
-                                              Theme.of(context).primaryColor,
-                                          child: Text(
-                                            participant[0],
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12),
-                                          ),
-                                        ),
-                                        label: Text(
-                                          participant,
-                                          style: TextStyle(fontSize: 14),
-                                        ),
+                                children: (snapshot.data![0] as EventCollectionDocument).participants.map((participantId) {
+                                  // Find user from getAllUsers result by their ID
+                                  final List<DatePickerUser> allUsers = snapshot.data![1] as List<DatePickerUser>;
+                                  final user = allUsers.firstWhere(
+                                    (u) => u.userId == participantId,
+                                    orElse: () => DatePickerUser("Unknown", participantId)
+                                  );
+                                  
+                                  return Chip(
+                                    backgroundColor: Theme.of(context)
+                                        .primaryColor
+                                        .withOpacity(0.1),
+                                    side: BorderSide(
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withOpacity(0.2),
+                                    ),
+                                    avatar: CircleAvatar(
+                                      backgroundColor:
+                                          Theme.of(context).primaryColor,
+                                      child: Text(
+                                        user.name[0],
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12),
                                       ),
-                                    )
-                                    .toList(),
+                                    ),
+                                    label: Text(
+                                      user.name,
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                  );
+                                }).toList(),
                               ),
                             ],
                           ),

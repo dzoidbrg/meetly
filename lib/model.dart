@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/models.dart';
@@ -9,6 +11,9 @@ class DatePickerUser {
   String name;
   String userId;
   DatePickerUser(this.name, this.userId);
+  @override
+  // TODO: implement hashCode
+  int get hashCode => this.userId.hashCode;
 }
 
 class EventCollectionDocument {
@@ -49,7 +54,13 @@ class AppwriteData extends ChangeNotifier {
     var response =
         await functions.createExecution(functionId: "680547ee00322e0ecc7a");
     print(response.responseBody);
-    return [];
+    var data = jsonDecode(response.responseBody) as Map<String, dynamic>;
+    var usersArray = data["users"] as List<dynamic>;
+    var dataPickerUsers = <DatePickerUser>[];
+    for (var user in usersArray) {
+      dataPickerUsers.add(DatePickerUser(user["name"], user["id"]));
+    }
+    return dataPickerUsers;
   }
 
   void addEvent(
