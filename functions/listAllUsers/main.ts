@@ -17,10 +17,13 @@ export default async ({ req, res, log, error }: any) => {
     // These logs won't be seen by your end users
     log(`Total users: ${response.total}`);
     
-    // Extract only the names from the users array
-    const userNames = response.users.map(user => user.name);
+    // Extract only the names and IDs from the users array
+    const userData = response.users.map(user => ({
+      name: user.name,
+      id: user.$id
+    }));
     
-    return res.json({ names: userNames });
+    return res.json({ users: userData });
   } catch(err) {
     error("Could not list users: " + err.message);
   }
