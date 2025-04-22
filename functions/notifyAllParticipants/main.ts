@@ -12,7 +12,7 @@ export default async ({ req, res, log, error }: any) => {
 
   try {
     const response = await users.list();
-    log(`request: ${req.bodyJson.participants}`)
+    log(`request: ${req.bodyJson.participantsf}`)
 
     // Log messages and errors to the Appwrite Console
     // These logs won't be seen by your end users
