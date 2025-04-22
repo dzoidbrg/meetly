@@ -16,7 +16,13 @@ class Notification {
   EVENT_INVITATION_HAS_BEEN_ADDED 
   */
   String type;
-  Notification(this.userID, this.type, this.invitedEventId); 
+  Notification(this.userID, this.type, this.invitedEventId);
+}
+
+class NotificationToDisplay {
+  String title;
+  String desc;
+  NotificationToDisplay(this.title, this.desc);
 }
 
 class DatePickerUser {
@@ -44,10 +50,12 @@ class AppwriteData extends ChangeNotifier {
   Databases databases;
   Teams teams;
   Functions functions;
+  Messaging messaging;
   User? user;
   bool isLoading = true;
   bool shouldLogin = false;
-  AppwriteData(this.account, this.databases, this.teams, this.functions) {
+  AppwriteData(this.account, this.databases, this.teams, this.functions,
+      this.messaging) {
     //
     attemptSessionRestore();
   }
@@ -77,16 +85,32 @@ class AppwriteData extends ChangeNotifier {
 
   void addEvent(
       String title, DateTime whenDate, List<String> participants) async {
+    var eventId = Uuid().v4();
     await databases.createDocument(
         databaseId: DATABASE_ID,
         collectionId: EVENTS_COLLECTION_ID,
-        documentId: Uuid().v4(),
+        documentId: eventId,
         data: {
           "title": title,
           "creatorUserId": user!.$id,
           "when": DateFormat("yyyy-MM-dd hh:mm:ss").format(whenDate),
           "participants": participants
         });
+    // Send notfications to all!!!
+    // for (var participant in participants) {
+    //   await databases.createDocument(
+    //       databaseId: DATABASE_ID,
+    //       collectionId: NOTIFICATIONS_COLLECTION_ID,
+    //       documentId: Uuid().v4(),
+    //       data: {
+    //         "userID": participant,
+    //         "type": "EVENT_INVITATION_HAS_BEEN_ADDED",
+    //         "invitedEventId": eventId
+    //       });
+    //   messaging.client
+    // }
+    // Call cloud funcition
+
     notifyListeners();
   }
 
@@ -142,7 +166,33 @@ class AppwriteData extends ChangeNotifier {
     }
   }
 
-  void getAllNotifications() {}
+  Future<List<NotificationToDisplay>> getAllNotifications() async {
+    var rawNotifs = await databases.listDocuments(
+        databaseId: DATABASE_ID,
+        collectionId: NOTIFICATIONS_COLLECTION_ID,
+        queries: [Query.equal("userID", user!.$id)]);
+    ;
+    var parsedNotifs = rawNotifs.documents
+        .map((elem) => Notification(elem.data["userID"], elem.data["type"],
+            elem.data["invitedEventId"]))
+        .toList();
+    var notifsToDisplay = <NotificationToDisplay>[];
+    for (var notif in parsedNotifs) {
+      switch (notif.type) {
+        case "EVENT_INVITATION_HAS_BEEN_ADDED":
+          var correspondingEvent = await getEvent(notif
+              .invitedEventId!); //We can use ! cuz type demands this. Error is wanted here
+          notifsToDisplay.add(NotificationToDisplay(
+              "Invitation to ${correspondingEvent.title}",
+              "You have been invited to ${correspondingEvent.title}. Look at My Events to check the corresponding details."));
+          break;
+        default:
+          break;
+      }
+    }
+    return notifsToDisplay;
+  }
+
   Future<String?> register(String email, String password, String name) async {
     try {
       await account.create(

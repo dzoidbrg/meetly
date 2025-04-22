@@ -18,12 +18,14 @@ void main() {
       .setProject('680540a600066dd5334c')
       .setSelfSigned(status: true);
   Account account = Account(client);
+  Messaging messaging = Messaging(client);
   Teams teams = Teams(client);
   Functions functions = Functions(client);
   var databases = Databases(client);
 // For self signed certificates, only use for development
   runApp(ChangeNotifierProvider(
-      create: (context) => AppwriteData(account, databases, teams, functions),
+      create: (context) =>
+          AppwriteData(account, databases, teams, functions, messaging),
       child: MyApp()));
 }
 
