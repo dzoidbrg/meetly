@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart' as models;
+import 'package:flutter/services.dart';
 import 'package:meetlyv2/AddPage.dart';
+import 'package:meetlyv2/NotificationsView.dart';
 import 'package:meetlyv2/account.dart';
 import 'package:meetlyv2/discover.dart';
 import 'package:meetlyv2/login.dart';
@@ -26,6 +28,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  static const platform = MethodChannel('mast3rsoft.com/meetlyv2');
+
   const MyApp({super.key});
 
   // This widget is the root of your application.
@@ -138,6 +142,20 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text(widget.title,
                 style: TextStyle(fontWeight: FontWeight.w500)),
             elevation: 0,
+            actions: [
+              IconButton(
+                icon: Icon(
+                  Icons.notifications,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  // TODO: Implement notifications functionality
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (ctx) => Material(child: NotificationsView())));
+                },
+                tooltip: 'Notifications',
+              ),
+            ],
             bottom: TabBar(
               indicatorSize: TabBarIndicatorSize.label,
               labelColor: Theme.of(context).primaryColor,

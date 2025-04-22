@@ -5,7 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:appwrite/models.dart';
 import 'package:intl/intl.dart';
 import 'package:meetlyv2/constants.dart';
+import 'package:meetlyv2/main.dart';
 import 'package:uuid/uuid.dart';
+
+class Notification {
+  String? invitedEventId;
+  String userID;
+  /* 
+  TYPES
+  EVENT_INVITATION_HAS_BEEN_ADDED 
+  */
+  String type;
+  Notification(this.userID, this.type, this.invitedEventId); 
+}
 
 class DatePickerUser {
   String name;
@@ -130,6 +142,7 @@ class AppwriteData extends ChangeNotifier {
     }
   }
 
+  void getAllNotifications() {}
   Future<String?> register(String email, String password, String name) async {
     try {
       await account.create(
@@ -155,6 +168,20 @@ class AppwriteData extends ChangeNotifier {
 
       notifyListeners();
     }
+    if (!shouldLogin) {
+      print("DDd");
+      var result = await MyApp.platform.invokeMethod<String?>('getFCMToken');
+      if (result != null) {
+        try {
+          await account.createPushTarget(
+              targetId: Uuid().v4(), identifier: result);
+          print("Created Push Target");
+        } catch (e) {
+          print("Target already made := no problem");
+        }
+      }
+    }
+    print("ass");
   }
 
   void setAccount(Account acc) {
