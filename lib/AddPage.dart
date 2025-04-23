@@ -291,6 +291,7 @@ class _AddEventPageState extends State<AddEventPage> {
                         // Convert DatePickerUser objects to user IDs for the API
                         List<String> participantIds = participants.map((p) => p.userId).toList();
                         model.addEvent(title, dateTime, participantIds);
+                        
                         Navigator.pop(context);
                         model
                             .forceNotify(); // TODO: FInd out why this is needed and if this has any consequences. This was added to fix the problem that after return to dsicover after add no update.

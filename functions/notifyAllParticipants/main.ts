@@ -26,7 +26,6 @@ export default async ({ req, res, log, error }: any) => {
     
     return res.json({ users: userData });
   } catch(err) {
-    error("Could not list users: " + err.message);
   }
 
   // The req object contains the request data
