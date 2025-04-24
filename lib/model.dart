@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:meetlyv2/constants.dart';
 import 'package:meetlyv2/main.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:convert';
 
 class Notification {
   String? invitedEventId;
@@ -96,21 +97,9 @@ class AppwriteData extends ChangeNotifier {
           "when": DateFormat("yyyy-MM-dd hh:mm:ss").format(whenDate),
           "participants": participants
         });
-    // Send notfications to all!!!
-    // for (var participant in participants) {
-    //   await databases.createDocument(
-    //       databaseId: DATABASE_ID,
-    //       collectionId: NOTIFICATIONS_COLLECTION_ID,
-    //       documentId: Uuid().v4(),
-    //       data: {
-    //         "userID": participant,
-    //         "type": "EVENT_INVITATION_HAS_BEEN_ADDED",
-    //         "invitedEventId": eventId
-    //       });
-    //   messaging.client
-    // }
-    // Call cloud funcition
-
+    await functions.createExecution(
+        functionId: "680a0fd000211f0db12d",
+        body: json.encode({"participants": participants, "eventID": eventId}));
     notifyListeners();
   }
 
