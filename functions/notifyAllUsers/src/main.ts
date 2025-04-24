@@ -11,7 +11,7 @@ interface NotifyAllUsersRequest {
 }
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log }: any) => {
-  log(req.bodyText);                  // Raw request body, contains request data
+  log(JSON.stringify(req.bodyJSON));                  // Raw request body, contains request data
   const parsedRequest: NotifyAllUsersRequest = req.bodyJSON // Object from parsed JSON request body, otherwise string
   const client = new sdk.Client()
     .setEndpoint(Deno.env.get("APPWRITE_FUNCTION_API_ENDPOINT") ?? '')
