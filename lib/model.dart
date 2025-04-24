@@ -97,6 +97,7 @@ class AppwriteData extends ChangeNotifier {
           "when": DateFormat("yyyy-MM-dd hh:mm:ss").format(whenDate),
           "participants": participants
         });
+    print("Function triggered");
     await functions.createExecution(
         functionId: "680a0fd000211f0db12d",
         body: json.encode({"participants": participants, "eventID": eventId}));

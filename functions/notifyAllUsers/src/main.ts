@@ -21,11 +21,11 @@ export default async ({ req, res, log }: any) => {
   const databases = new sdk.Databases(client);
   const messaging = new sdk.Messaging(client);
 
-  for (const participant of parsedRequest.participants) {
+  for (const participant of req.bodyJSON.participants) {
     await databases.createDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, participant, {
       userID: participant,
       type: "EVENT_INVITATION_HAS_BEEN_ADDED",
-      invitedEventId: parsedRequest.eventID
+      invitedEventId: req.bodyJSON.eventID
     });
     await messaging.createPush(sdk.ID.unique(), "You have been invited to an event!", "Check Meetly for further details",[],[participant])
   }
