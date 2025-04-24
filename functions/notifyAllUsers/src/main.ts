@@ -11,8 +11,8 @@ interface NotifyAllUsersRequest {
 }
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log }: any) => {
-  log(JSON.stringify(req.bodyJSON));                  // Raw request body, contains request data
-  const parsedRequest: NotifyAllUsersRequest = req.bodyJSON // Object from parsed JSON request body, otherwise string
+  log(req.bodyText);                  // Raw request body, contains request data
+  const parsedRequest: NotifyAllUsersRequest = req.bodyJson // Object from parsed JSON request body, otherwise string
   const client = new sdk.Client()
     .setEndpoint(Deno.env.get("APPWRITE_FUNCTION_API_ENDPOINT") ?? '')
     .setProject(Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID") ?? '')
@@ -21,11 +21,11 @@ export default async ({ req, res, log }: any) => {
   const databases = new sdk.Databases(client);
   const messaging = new sdk.Messaging(client);
 
-  for (const participant of req.bodyJSON.participants) {
+  for (const participant of parsedRequest.participants) {
     await databases.createDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, participant, {
       userID: participant,
       type: "EVENT_INVITATION_HAS_BEEN_ADDED",
-      invitedEventId: req.bodyJSON.eventID
+      invitedEventId: parsedRequest.eventID
     });
     await messaging.createPush(sdk.ID.unique(), "You have been invited to an event!", "Check Meetly for further details",[],[participant])
   }
